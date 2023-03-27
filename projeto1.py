@@ -19,7 +19,7 @@ class GridProblem(Problem):
         return (x+dx, y+dy)
 
     def actions(self, state):
-        """Podes move-te para uma célula em qualquer das direcções para uma casa 
+        """Podes move-te para uma célula em qualquer das direcções para uma casa
            que não seja obstáculo."""
         x, y = state
         return [act for act in self.directions.keys() if (x+self.directions[act][0], y+self.directions[act][1]) not in self.obstacles]
@@ -36,6 +36,13 @@ class GridProblem(Problem):
 
     def addObstacle(self, obstacle):
         self.obstacles.add(obstacle)
+
+    def showOutput(self, lista):
+        output = ""
+        for i in lista:
+            output += ''.join(i)
+            output += '\n'
+        print(output)
 
     def display_modelo(self, path=[]):
         """ print the state please"""
@@ -85,11 +92,7 @@ class GridProblem(Problem):
                 else:
                     add.append('. ')
             lista.append(add)
-        for i in lista:
-            output += ''.join(i)
-            output += '\n'
-
-        print(output)
+        self.showOutput(lista)
 
 
 
