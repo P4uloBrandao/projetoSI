@@ -7,6 +7,7 @@ class GridProblem(Problem):
         self.initial = initial
         self.goal = goal
         self.obstacles = set(obstacles) - {initial, goal}
+        self.pacman = initial
 
     directions = {"N": (0, -1), "S": (0, +1), "W": (-1, 0),
                   "E": (1,  0)}  # ortogonais
@@ -33,22 +34,16 @@ class GridProblem(Problem):
         """
         return manhatan(no.state, self.goal)
 
-
-pacman=(1,1)
-pastilha=(1,6)
-l = line(2, 2, 1, 0, 6)
-c = line(2, 3, 0, 1, 4)
-fronteira = quadro(0, 0, 10)
-obstaculos = fronteira | l | c
-g = GridProblem(initial=(1, 1), obstacles=fronteira | l | c, goal=(3, 3))
-
-# display(pacman, pastilha, fronteira | l | c,path=[])
+    def addObstacle(self, obstacle):
+        self.obstacles.add(obstacle)
 
 
 def display_modelo(pacman, pastilha, obstaculos, path=[]):
     """ print the state please"""
     pacmanX, pacmanY = pacman
     pastilhaX, pastilhaY = pastilha
+    arround_pacman = [(pacmanX+i, pacmanY+j)
+                      for i in range(-1, 2) for j in range(-1, 2)]
 
     if pacmanX < pastilhaX:
         minX = pacmanX - 1
@@ -75,8 +70,7 @@ def display_modelo(pacman, pastilha, obstaculos, path=[]):
         maxY = pacmanY + 1
 
     output = ""
-    arround_pacman = [(pacmanX+i, pacmanY+j)
-                      for i in range(-1, 2) for j in range(-1, 2)]
+    print(arround_pacman)
     for j in range(minY, maxY+1):  # range devia conter apenas o pacman e a pastilha
         for i in range(minX, maxX+1):  # range devia conter apenas o pacman e a pastilha
             if pacman == (i, j):
@@ -95,10 +89,44 @@ def display_modelo(pacman, pastilha, obstaculos, path=[]):
     print(output)
 
 
-display_modelo(pacman, pastilha, fronteira | l | c, path=[])
+def obstaclesAround(pacman, obstacles):
+    arround_pacman = [(pacman[0]+i, pacman[1]+j)
+                      for i in range(-1, 2) for j in range(-1, 2)]
+    res = []
+    for i in arround_pacman:
+        if i in obstacles:
+            res.append(i)
+    return res
+
+def pathCount(pacman, iteracao):
+    path= []
+    for x in iteracao:
+        if x == 'N':
+            pacman = (pacman[0], pacman[1]-1)
+            path.append(pacman)
+        elif x == 'S':
+            pacman = (pacman[0], pacman[1]+1)
+            path.append(pacman)
+        elif x == 'W':
+            pacman = (pacman[0]-1, pacman[1])
+            path.append(pacman)
+        elif x == 'E':
+            pacman = (pacman[0]+1, pacman[1])
+            path.append(pacman)
+    return path
 
 
 def planeia_online(pacman, pastilha, obstaculos):
+
+    aroundObstacles = obstaclesAround(pacman, obstaculos)
+    iteracao = 0
+
+    gridProblem = GridProblem(
+        initial=pacman, obstacles=aroundObstacles, goal=pastilha)
+
+    res_astar = astar_search(gridProblem, gridProblem.manhatan_goal).solution()
+
+    acabou = False
 
     print("MUNDO")
     display(pacman, pastilha, fronteira | l | c, path=[])
@@ -106,17 +134,38 @@ def planeia_online(pacman, pastilha, obstaculos):
     print("\nMODELO")
     #  faz modelo é o mundo cortado em que é mostrado o pacman e a pastilha
     # em cada iteração irá mostrar o plano gerado pelo astar_search
+    display_modelo(pacman, pastilha, fronteira | l | c, path=[])
 
-    print("\nIteração: " + str(0))
-    print(action())
-    print("Expandidos: " + str(0))
-    # bem como o número de estados expandidos o novo modelo do mundo com a sua nova posição e as marcas das posições por onde andou.
-    # o ciclo termina quando o Pacman chega à pastilha
+    while not acabou:
+        path=[]
+        iteracao += 1
+        print("\nITERAÇÃO " + str(iteracao))
+        res_astar = astar_search(gridProblem, gridProblem.manhatan_goal).solution()
+        path = pathCount(pacman, res_astar)
+        for x in range(1, len(path)):
+            if path[x] in obstaculos:
+                del path[x:]
+                gridProblem.pacman = path[x-1]
+                break
+            else:
+                gridProblem.pacman = path[x]
+                gridProblem.addObstacle(gridProblem.pacman)
+                
 
-    print("\nFim: total de expandidos: " + str(0))
-    # No final deve indicar o total de expandidos acumulados ao longo dos vários planeamentos.
+
+                
+        display_modelo(gridProblem.pacman, pastilha, fronteira | l | c, path=path)
+        acabou = True
 
 
-res_astar = astar_search(g, g.manhatan_goal)
-print(res_astar.solution())
-print('Custo =', res_astar)
+
+
+pacman=(1,2)
+pastilha=(3,6)
+l = line(2,2,1,0,6)
+c = line(2,3,0,1,4)
+fronteira = quadro(0,0,10)
+obstaculos=fronteira | l | c
+planeia_online(pacman,pastilha,obstaculos)
+
+
