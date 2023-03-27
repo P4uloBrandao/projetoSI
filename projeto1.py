@@ -77,7 +77,6 @@ class GridProblem(Problem):
 
         lista= []
         output = ""
-        print(arround_pacman)
         for j in range(minY, maxY+1):  # range devia conter apenas o self.pacman e a self.goal
             add= []
             for i in range(minX, maxX+1):  # range devia conter apenas o self.pacman e a self.goal
@@ -152,6 +151,7 @@ def planeia_online(pacman, pastilha, obstaculos):
         iteracao += 1
         print("\nITERAÇÃO " + str(iteracao))
         res_astar = astar_search(gridProblem, gridProblem.manhatan_goal).solution()
+        print(str(res_astar) + "\n")
         path = pathCount(pacman, res_astar)
         for x in range(1, len(path)):
             if path[x] in obstaculos:
