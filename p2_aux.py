@@ -14,7 +14,6 @@ def manhatan(p,q):
 
 def display(pacman,pastilha,obstaculos,path=[]):
     """ print the state please"""
-    pacmanX,pacmanY=pacman
     osXs={x for (x,_) in obstaculos | {pastilha, pacman}}
     minX=min(osXs)
     maxX=max(osXs)
