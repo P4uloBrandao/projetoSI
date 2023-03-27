@@ -8,7 +8,40 @@ class GridProblem(Problem):
         self.goal = goal
         self.obstacles = set(obstacles) - {initial, goal}
         self.pacman = initial
-        self.model = None
+        pacmanX, pacmanY = self.pacman
+        pastilhaX, pastilhaY = self.goal
+
+        if pacmanX < pastilhaX:
+            minX = pacmanX - 1
+            maxX = pastilhaX
+
+        elif pacmanX > pastilhaX:
+            minX = pastilhaX
+            maxX = pacmanX + 1
+
+        else:
+            minX = pacmanX - 1
+            maxX = pacmanX + 1
+
+        if pacmanY < pastilhaY:
+            minY = pacmanY - 1
+            maxY = pastilhaY
+
+        elif pacmanY > pastilhaY:
+            minY = pastilhaY
+            maxY = pacmanY + 1
+
+        else:
+            minY = pacmanY - 1
+            maxY = pacmanY + 1
+
+        lista = []
+        for j in range(minY, maxY+1):  # range devia conter apenas o self.pacman e a self.goal
+            add = []
+            for i in range(minX, maxX+1):  # range devia conter apenas o self.pacman e a self.goal
+                add.append((i, j))
+            lista.append(add)
+        self.expanded = lista
 
     directions = {"N": (0, -1), "S": (0, +1), "W": (-1, 0),
                   "E": (1,  0)}  # ortogonais
@@ -38,19 +71,16 @@ class GridProblem(Problem):
     def addObstacle(self, obstacle):
         self.obstacles.add(obstacle)
 
-    def showOutput(self, lista, path=[]):
-        pacmanX, pacmanY = self.pacman
-        arround_pacman = [(pacmanX+i, pacmanY+j)
-                for i in range(-1, 2) for j in range(-1, 2)]
+    def showOutput(self, path=[]):
         output = ""
-        for y in lista:
-            ch=""
+        for y in self.expanded:
+            ch = ""
             for x in range(len(y)):
                 if self.pacman == y[x]:
                     ch += '@ '
                 elif self.goal == y[x]:
                     ch += '* '
-                elif y[x] in self.obstacles and y[x] in arround_pacman:
+                elif y[x] in self.obstacles:
                     ch += '# '
                 elif y[x] in path:
                     ch += '+ '
@@ -59,61 +89,23 @@ class GridProblem(Problem):
             output += ch + "\n"
         print(output)
 
-    def display_modelo(self, path=[]):
-        pacmanX, pacmanY = self.pacman
-        pastilhaX, pastilhaY = self.goal
 
-
-        if pacmanX < pastilhaX:
-            minX = pacmanX - 1
-            maxX = pastilhaX
-
-        elif pacmanX > pastilhaX:
-            minX = pastilhaX
-            maxX = pacmanX + 1
-
-        else:
-            minX = pacmanX - 1
-            maxX = pacmanX + 1
-
-        if pacmanY < pastilhaY:
-            minY = pacmanY - 1
-            maxY = pastilhaY
-
-        elif pacmanY > pastilhaY:
-            minY = pastilhaY
-            maxY = pacmanY + 1
-
-        else:
-            minY = pacmanY - 1
-            maxY = pacmanY + 1
-
-        lista= []
-        for j in range(minY, maxY+1):  # range devia conter apenas o self.pacman e a self.goal
-            add= []
-            for i in range(minX, maxX+1):  # range devia conter apenas o self.pacman e a self.goal
-                add.append((i, j))
-            lista.append(add)
-        self.model = lista
-        self.showOutput(lista)
-
-
-
-
-
+def aroundPacman(pacman):
+    return [(pacman[0]+i, pacman[1]+j)
+            for i in range(-1, 2) for j in range(-1, 2)]
 
 
 def obstaclesAround(pacman, obstacles):
-    arround_pacman = [(pacman[0]+i, pacman[1]+j)
-                      for i in range(-1, 2) for j in range(-1, 2)]
+    arround_pacman = aroundPacman(pacman)
     res = []
     for i in arround_pacman:
         if i in obstacles:
             res.append(i)
     return res
 
+
 def pathCount(pacman, iteracao):
-    path= []
+    path = [pacman]
     for x in iteracao:
         if x == 'N':
             pacman = (pacman[0], pacman[1]-1)
@@ -148,13 +140,14 @@ def planeia_online(pacman, pastilha, obstaculos):
     print("\nMODELO")
     #  faz modelo é o mundo cortado em que é mostrado o pacman e a pastilha
     # em cada iteração irá mostrar o plano gerado pelo astar_search
-    gridProblem.display_modelo( path=[])
+    gridProblem.showOutput(path=[])
 
     while not acabou:
-        path=[]
+        path = []
         iteracao += 1
         print("\nITERAÇÃO " + str(iteracao))
-        res_astar = astar_search(gridProblem, gridProblem.manhatan_goal).solution()
+        res_astar = astar_search(
+            gridProblem, gridProblem.manhatan_goal).solution()
         print(str(res_astar) + "\n")
         path = pathCount(pacman, res_astar)
         for x in range(1, len(path)):
@@ -164,23 +157,28 @@ def planeia_online(pacman, pastilha, obstaculos):
                 break
             else:
                 gridProblem.pacman = path[x]
-                gridProblem.addObstacle(gridProblem.pacman)
-                
+                aroundPac = aroundPacman(gridProblem.pacman)
+                for i in aroundPac:
+                    if i in obstaculos and i not in gridProblem.obstacles:
+                        gridProblem.addObstacle(i)
+                    model = gridProblem.expanded
+                    if i[1] > len(model):
+                        model.append([])
+                    for x in range(1, len(model)+1):
+                        if i[1] == x and i not in model[x-1]:
+                            model[x-1].append(i)
+                            gridProblem.expanded = model
+
+        gridProblem.showOutput(path=path)
+
+        if gridProblem.pacman == gridProblem.goal:
+            acabou = True
 
 
-                
-        gridProblem.display_modelo(path=path)
-        acabou = True
-
-
-
-
-pacman=(1,2)
-pastilha=(3,6)
-l = line(2,2,1,0,6)
-c = line(2,3,0,1,4)
-fronteira = quadro(0,0,10)
-obstaculos=fronteira | l | c
-planeia_online(pacman,pastilha,obstaculos)
-
-
+pacman = (1, 2)
+pastilha = (3, 6)
+l = line(2, 2, 1, 0, 6)
+c = line(2, 3, 0, 1, 4)
+fronteira = quadro(0, 0, 10)
+obstaculos = fronteira | l | c
+planeia_online(pacman, pastilha, obstaculos)
