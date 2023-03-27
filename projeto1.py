@@ -8,6 +8,7 @@ class GridProblem(Problem):
         self.goal = goal
         self.obstacles = set(obstacles)
         self.pacman = initial
+        self.visited = set()
 
     directions = {"N": (0, -1), "S": (0, +1), "W": (-1, 0),
                   "E": (1,  0)}  # ortogonais
@@ -22,8 +23,14 @@ class GridProblem(Problem):
         """Podes move-te para uma célula em qualquer das direcções para uma casa
            que não seja obstáculo."""
         x, y = state
-        return [act for act in self.directions.keys() if (x+self.directions[act][0], y+self.directions[act][1]) not in self.obstacles]
-
+        actions = []
+        for action in self.directions:
+            dx, dy = self.directions[action]
+            if (x+dx, y+dy) not in self.obstacles:
+                if (x+dx, y+dy) not in self.visited:
+                    self.visited.add((x+dx, y+dy))
+                    actions.append(action)
+        return actions
     def goal_test(self, state):
         return state == self.goal
 
@@ -52,7 +59,7 @@ def obstaclesAround(pacman, obstacles):
     return res
 
 
-def pathCount(pacman, iteracao):
+def pacWalk(pacman, iteracao):
     path = [pacman]
     for x in iteracao:
         if x == 'N':
@@ -78,8 +85,6 @@ def planeia_online(pacman, pastilha, obstaculos):
     gridProblem = GridProblem(
         initial=pacman, obstacles=aroundObstacles, goal=pastilha)
 
-    res_astar = astar_search(gridProblem, gridProblem.manhatan_goal).solution()
-
     acabou = False
 
     print("MUNDO")
@@ -97,7 +102,7 @@ def planeia_online(pacman, pastilha, obstaculos):
         res_astar = astar_search(
             gridProblem, gridProblem.manhatan_goal).solution()
         print(str(res_astar) + "\n")
-        path = pathCount(pacman, res_astar)
+        path = pacWalk(gridProblem.pacman, res_astar)
         for x in range(1, len(path)):
             if path[x] in obstaculos:
                 del path[x:]
