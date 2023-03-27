@@ -41,7 +41,7 @@ class GridProblem(Problem):
             for i in range(minX, maxX+1):  # range devia conter apenas o self.pacman e a self.goal
                 add.append((i, j))
             lista.append(add)
-        self.expanded = lista
+        self.model = lista
 
     directions = {"N": (0, -1), "S": (0, +1), "W": (-1, 0),
                   "E": (1,  0)}  # ortogonais
@@ -73,7 +73,7 @@ class GridProblem(Problem):
 
     def showOutput(self, path=[]):
         output = ""
-        for y in self.expanded:
+        for y in self.model:
             ch = ""
             for x in range(len(y)):
                 if self.pacman == y[x]:
@@ -161,13 +161,13 @@ def planeia_online(pacman, pastilha, obstaculos):
                 for i in aroundPac:
                     if i in obstaculos and i not in gridProblem.obstacles:
                         gridProblem.addObstacle(i)
-                    model = gridProblem.expanded
+                    model = gridProblem.model
                     if i[1] > len(model):
                         model.append([])
                     for x in range(1, len(model)+1):
                         if i[1] == x and i not in model[x-1]:
                             model[x-1].append(i)
-                            gridProblem.expanded = model
+                            gridProblem.model = model
 
         gridProblem.showOutput(path=path)
 
