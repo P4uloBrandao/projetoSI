@@ -37,56 +37,61 @@ class GridProblem(Problem):
     def addObstacle(self, obstacle):
         self.obstacles.add(obstacle)
 
+    def display_modelo(self, path=[]):
+        """ print the state please"""
+        pacmanX, pacmanY = self.pacman
+        pastilhaX, pastilhaY = self.goal
+        arround_pacman = [(pacmanX+i, pacmanY+j)
+                        for i in range(-1, 2) for j in range(-1, 2)]
 
-def display_modelo(pacman, pastilha, obstaculos, path=[]):
-    """ print the state please"""
-    pacmanX, pacmanY = pacman
-    pastilhaX, pastilhaY = pastilha
-    arround_pacman = [(pacmanX+i, pacmanY+j)
-                      for i in range(-1, 2) for j in range(-1, 2)]
+        if pacmanX < pastilhaX:
+            minX = pacmanX - 1
+            maxX = pastilhaX
 
-    if pacmanX < pastilhaX:
-        minX = pacmanX - 1
-        maxX = pastilhaX
+        elif pacmanX > pastilhaX:
+            minX = pastilhaX
+            maxX = pacmanX + 1
 
-    elif pacmanX > pastilhaX:
-        minX = pastilhaX
-        maxX = pacmanX + 1
+        else:
+            minX = pacmanX - 1
+            maxX = pacmanX + 1
 
-    else:
-        minX = pacmanX - 1
-        maxX = pacmanX + 1
+        if pacmanY < pastilhaY:
+            minY = pacmanY - 1
+            maxY = pastilhaY
 
-    if pacmanY < pastilhaY:
-        minY = pacmanY - 1
-        maxY = pastilhaY
+        elif pacmanY > pastilhaY:
+            minY = pastilhaY
+            maxY = pacmanY + 1
 
-    elif pacmanY > pastilhaY:
-        minY = pastilhaY
-        maxY = pacmanY + 1
+        else:
+            minY = pacmanY - 1
+            maxY = pacmanY + 1
 
-    else:
-        minY = pacmanY - 1
-        maxY = pacmanY + 1
+        output = ""
+        print(arround_pacman)
+        for j in range(minY, maxY+1):  # range devia conter apenas o self.pacman e a self.goal
+            for i in range(minX, maxX+1):  # range devia conter apenas o self.pacman e a self.goal
+                if self.pacman == (i, j):
+                    ch = '@'
+                elif self.goal == (i, j):
+                    ch = "*"
+                elif (i, j) in self.obstacles and (i, j) in arround_pacman:
+                    ch = "#"
+                elif (i, j) in path:
+                    ch = '+'
+                else:
+                    ch = "."
+                output += ch + " "
+            output += "\n"
 
-    output = ""
-    print(arround_pacman)
-    for j in range(minY, maxY+1):  # range devia conter apenas o pacman e a pastilha
-        for i in range(minX, maxX+1):  # range devia conter apenas o pacman e a pastilha
-            if pacman == (i, j):
-                ch = '@'
-            elif pastilha == (i, j):
-                ch = "*"
-            elif (i, j) in obstaculos and (i, j) in arround_pacman:
-                ch = "#"
-            elif (i, j) in path:
-                ch = '+'
-            else:
-                ch = "."
-            output += ch + " "
-        output += "\n"
+        print(output)
 
-    print(output)
+
+
+
+def display_modelo_after(pacmanInit, pacmanAft, path):
+    pass
 
 
 def obstaclesAround(pacman, obstacles):
@@ -134,7 +139,7 @@ def planeia_online(pacman, pastilha, obstaculos):
     print("\nMODELO")
     #  faz modelo é o mundo cortado em que é mostrado o pacman e a pastilha
     # em cada iteração irá mostrar o plano gerado pelo astar_search
-    display_modelo(pacman, pastilha, fronteira | l | c, path=[])
+    gridProblem.display_modelo( path=[])
 
     while not acabou:
         path=[]
@@ -154,7 +159,7 @@ def planeia_online(pacman, pastilha, obstaculos):
 
 
                 
-        display_modelo(gridProblem.pacman, pastilha, fronteira | l | c, path=path)
+        gridProblem.display_modelo(path=path)
         acabou = True
 
 
