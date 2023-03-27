@@ -8,6 +8,7 @@ class GridProblem(Problem):
         self.goal = goal
         self.obstacles = set(obstacles) - {initial, goal}
         self.pacman = initial
+        self.model = None
 
     directions = {"N": (0, -1), "S": (0, +1), "W": (-1, 0),
                   "E": (1,  0)}  # ortogonais
@@ -37,19 +38,31 @@ class GridProblem(Problem):
     def addObstacle(self, obstacle):
         self.obstacles.add(obstacle)
 
-    def showOutput(self, lista):
+    def showOutput(self, lista, path=[]):
+        pacmanX, pacmanY = self.pacman
+        arround_pacman = [(pacmanX+i, pacmanY+j)
+                for i in range(-1, 2) for j in range(-1, 2)]
         output = ""
-        for i in lista:
-            output += ''.join(i)
-            output += '\n'
+        for y in lista:
+            ch=""
+            for x in range(len(y)):
+                if self.pacman == y[x]:
+                    ch += '@ '
+                elif self.goal == y[x]:
+                    ch += '* '
+                elif y[x] in self.obstacles and y[x] in arround_pacman:
+                    ch += '# '
+                elif y[x] in path:
+                    ch += '+ '
+                else:
+                    ch += '. '
+            output += ch + "\n"
         print(output)
 
     def display_modelo(self, path=[]):
-        """ print the state please"""
         pacmanX, pacmanY = self.pacman
         pastilhaX, pastilhaY = self.goal
-        arround_pacman = [(pacmanX+i, pacmanY+j)
-                        for i in range(-1, 2) for j in range(-1, 2)]
+
 
         if pacmanX < pastilhaX:
             minX = pacmanX - 1
@@ -76,21 +89,12 @@ class GridProblem(Problem):
             maxY = pacmanY + 1
 
         lista= []
-        output = ""
         for j in range(minY, maxY+1):  # range devia conter apenas o self.pacman e a self.goal
             add= []
             for i in range(minX, maxX+1):  # range devia conter apenas o self.pacman e a self.goal
-                if self.pacman == (i, j):
-                    add.append('@ ')
-                elif self.goal == (i, j):
-                    add.append('* ')
-                elif (i, j) in self.obstacles and (i, j) in arround_pacman:
-                    add.append('# ')
-                elif (i, j) in path:
-                    add.append('+ ')
-                else:
-                    add.append('. ')
+                add.append((i, j))
             lista.append(add)
+        self.model = lista
         self.showOutput(lista)
 
 
