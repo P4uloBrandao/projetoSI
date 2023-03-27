@@ -68,30 +68,33 @@ class GridProblem(Problem):
             minY = pacmanY - 1
             maxY = pacmanY + 1
 
+        lista= []
         output = ""
         print(arround_pacman)
         for j in range(minY, maxY+1):  # range devia conter apenas o self.pacman e a self.goal
+            add= []
             for i in range(minX, maxX+1):  # range devia conter apenas o self.pacman e a self.goal
                 if self.pacman == (i, j):
-                    ch = '@'
+                    add.append('@ ')
                 elif self.goal == (i, j):
-                    ch = "*"
+                    add.append('* ')
                 elif (i, j) in self.obstacles and (i, j) in arround_pacman:
-                    ch = "#"
+                    add.append('# ')
                 elif (i, j) in path:
-                    ch = '+'
+                    add.append('+ ')
                 else:
-                    ch = "."
-                output += ch + " "
-            output += "\n"
+                    add.append('. ')
+            lista.append(add)
+        for i in lista:
+            output += ''.join(i)
+            output += '\n'
 
         print(output)
 
 
 
 
-def display_modelo_after(pacmanInit, pacmanAft, path):
-    pass
+
 
 
 def obstaclesAround(pacman, obstacles):
