@@ -88,7 +88,7 @@ def planeia_online(pacman, pastilha, obstaculos):
     acabou = False
 
     print("MUNDO")
-    display(pacman, pastilha, fronteira | l | c, path=[])
+    display(pacman, pastilha, obstaculos, path=[])
 
     print("MODELO")
     #  faz modelo é o mundo cortado em que é mostrado o pacman e a pastilha
