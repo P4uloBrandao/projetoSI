@@ -7,7 +7,8 @@ class GridProblem(Problem):
         self.initial = initial
         self.goal = goal
         self.obstacles = set(obstacles)
-        self.expanded = set()
+        self.expanded = 0
+        self.expandedMoment=0
 
     directions = {"N": (0, -1), "S": (0, +1), "W": (-1, 0),
                   "E": (1,  0)}  # ortogonais
@@ -27,6 +28,8 @@ class GridProblem(Problem):
             dx, dy = self.directions[action]
             if (x+dx, y+dy) not in self.obstacles:
                 actions.append(action)
+        self.expanded += 1
+        self.expandedMoment += 1
         return actions
     def goal_test(self, state):
         return state == self.goal
@@ -87,7 +90,7 @@ def planeia_online(pacman, pastilha, obstaculos):
     print("MUNDO")
     display(pacman, pastilha, fronteira | l | c, path=[])
 
-    print("\nMODELO")
+    print("MODELO")
     #  faz modelo é o mundo cortado em que é mostrado o pacman e a pastilha
     # em cada iteração irá mostrar o plano gerado pelo astar_search
     display(gridProblem.initial, gridProblem.goal, gridProblem.obstacles)
@@ -95,10 +98,12 @@ def planeia_online(pacman, pastilha, obstaculos):
     while not acabou:
         path = []
         iteracao += 1
-        print("\nITERAÇÃO " + str(iteracao))
+        print("ITERAÇÃO: " + str(iteracao))
+        gridProblem.expandedMoment = 0
         res_astar = astar_search(
             gridProblem, gridProblem.manhatan_goal).solution()
-        print(str(res_astar) + "\n")
+        print(str(res_astar))
+        print("Expandidos " + str(gridProblem.expandedMoment))
         path = steps(gridProblem.initial, res_astar)
         for x in range(1, len(path)):
             if path[x] in obstaculos:
@@ -116,15 +121,9 @@ def planeia_online(pacman, pastilha, obstaculos):
 
         if gridProblem.initial == gridProblem.goal:
             acabou = True
+    print("FIM: total de expandidos: " + str(gridProblem.expanded ))
 
+def planear_adapt_online(pacman, pastilha, obstaculos):
+    # TODO
+    pass
 
-# Exemplo 3 
-
-pacman=(1,1)
-pastilha=(3,3)
-l = line(2,2,1,0,6)
-c = line(2,3,0,1,4)
-fronteira = quadro(0,0,10)
-obstaculos=fronteira | l | c
-# atacar o planeamento repetido
-planeia_online(pacman,pastilha,obstaculos)
