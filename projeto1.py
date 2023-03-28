@@ -7,8 +7,7 @@ class GridProblem(Problem):
         self.initial = initial
         self.goal = goal
         self.obstacles = set(obstacles)
-        self.pacman = initial
-        self.visited = set()
+        self.expanded = set()
 
     directions = {"N": (0, -1), "S": (0, +1), "W": (-1, 0),
                   "E": (1,  0)}  # ortogonais
@@ -27,9 +26,7 @@ class GridProblem(Problem):
         for action in self.directions:
             dx, dy = self.directions[action]
             if (x+dx, y+dy) not in self.obstacles:
-                if (x+dx, y+dy) not in self.visited:
-                    self.visited.add((x+dx, y+dy))
-                    actions.append(action)
+                actions.append(action)
         return actions
     def goal_test(self, state):
         return state == self.goal
@@ -59,7 +56,7 @@ def obstaclesAround(pacman, obstacles):
     return res
 
 
-def pacWalk(pacman, iteracao):
+def steps(pacman, iteracao):
     path = [pacman]
     for x in iteracao:
         if x == 'N':
@@ -93,7 +90,7 @@ def planeia_online(pacman, pastilha, obstaculos):
     print("\nMODELO")
     #  faz modelo é o mundo cortado em que é mostrado o pacman e a pastilha
     # em cada iteração irá mostrar o plano gerado pelo astar_search
-    display(gridProblem.pacman, gridProblem.goal, gridProblem.obstacles)
+    display(gridProblem.initial, gridProblem.goal, gridProblem.obstacles)
 
     while not acabou:
         path = []
@@ -102,29 +99,32 @@ def planeia_online(pacman, pastilha, obstaculos):
         res_astar = astar_search(
             gridProblem, gridProblem.manhatan_goal).solution()
         print(str(res_astar) + "\n")
-        path = pacWalk(gridProblem.pacman, res_astar)
+        path = steps(gridProblem.initial, res_astar)
         for x in range(1, len(path)):
             if path[x] in obstaculos:
                 del path[x:]
-                gridProblem.pacman = path[x-1]
+                gridProblem.initial = path[x-1]
                 break
             else:
-                gridProblem.pacman = path[x]
-                aroundPac = aroundPacman(gridProblem.pacman)
+                gridProblem.initial = path[x]
+                aroundPac = aroundPacman(gridProblem.initial)
                 for i in aroundPac:
                     if i in obstaculos and i not in gridProblem.obstacles:
                         gridProblem.addObstacle(i)
                             
-        display(gridProblem.pacman, gridProblem.goal, gridProblem.obstacles, path=path)
+        display(gridProblem.initial, gridProblem.goal, gridProblem.obstacles, path=path)
 
-        if gridProblem.pacman == gridProblem.goal:
+        if gridProblem.initial == gridProblem.goal:
             acabou = True
 
 
-pacman = (1, 2)
-pastilha = (3, 6)
-l = line(2, 2, 1, 0, 6)
-c = line(2, 3, 0, 1, 4)
-fronteira = quadro(0, 0, 10)
-obstaculos = fronteira | l | c
-planeia_online(pacman, pastilha, obstaculos)
+# Exemplo 3 
+
+pacman=(1,1)
+pastilha=(3,3)
+l = line(2,2,1,0,6)
+c = line(2,3,0,1,4)
+fronteira = quadro(0,0,10)
+obstaculos=fronteira | l | c
+# atacar o planeamento repetido
+planeia_online(pacman,pastilha,obstaculos)
