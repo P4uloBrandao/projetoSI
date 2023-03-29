@@ -123,6 +123,9 @@ def planeia_online(pacman, pastilha, obstaculos):
             acabou = True
     print("FIM: total de expandidos: " + str(gridProblem.expanded ))
 
+def planear_adapt_online(pacman, pastilha, obstaculos):
+    # TODO
+    pass
 
 class GridProblem(Problem):
     def __init__(self, initial, goal, obstacles=()):
