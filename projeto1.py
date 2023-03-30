@@ -7,9 +7,9 @@ class GridProblem(Problem):
         self.initial = initial
         self.goal = goal
         self.obstacles = set(obstacles)
-        self.expanded = 0
-        self.expandedMoment=0
-        self.heuristicas =set()
+        self.numExpanded = 0
+        self.expandedMoment = set()
+        self.heuristicas = set()
 
     directions = {"N": (0, -1), "S": (0, +1), "W": (-1, 0),
                   "E": (1,  0)}  # ortogonais
@@ -29,9 +29,10 @@ class GridProblem(Problem):
             dx, dy = self.directions[action]
             if (x+dx, y+dy) not in self.obstacles:
                 actions.append(action)
-        self.expanded += 1
-        self.expandedMoment += 1
+        self.numExpanded+=1
+        self.expandedMoment.add(state)
         return actions
+
     def goal_test(self, state):
         return state == self.goal
 
@@ -77,11 +78,17 @@ def steps(pacman, iteracao):
             path.append(pacman)
     return path
 
-def heuristica(initial, end, solutionCost):
-    iX, iY = initial
-    eX, eY = end
-    return (end, abs(solutionCost - (abs(iX-eX) + abs(iY-eY))))  
 
+def heuristica(gp, solutionCost):
+    res = []
+    for x in gp.expandedMoment:
+        for y in gp.heuristicas:
+            if y[0]==x:
+                gp.heuristicas.remove(y)
+                break
+        iX, iY = gp.initial
+        eX, eY = x
+        gp.heuristicas.add((x, abs(solutionCost - (abs(iX-eX) + abs(iY-eY)))))
 
 
 
@@ -107,11 +114,11 @@ def planeia_online(pacman, pastilha, obstaculos):
         path = []
         iteracao += 1
         print("ITERAÇÃO: " + str(iteracao))
-        gridProblem.expandedMoment = 0
+        gridProblem.expandedMoment.clear()
         res_astar = astar_search(
             gridProblem, gridProblem.manhatan_goal).solution()
         print(str(res_astar))
-        print("Expandidos " + str(gridProblem.expandedMoment))
+        print("Expandidos " + str(len(gridProblem.expandedMoment)))
         path = steps(gridProblem.initial, res_astar)
         for x in range(1, len(path)):
             if path[x] in obstaculos:
@@ -124,12 +131,14 @@ def planeia_online(pacman, pastilha, obstaculos):
                 for i in aroundPac:
                     if i in obstaculos and i not in gridProblem.obstacles:
                         gridProblem.addObstacle(i)
-                            
-        display(gridProblem.initial, gridProblem.goal, gridProblem.obstacles, path=path)
+
+        display(gridProblem.initial, gridProblem.goal,
+                gridProblem.obstacles, path=path)
 
         if gridProblem.initial == gridProblem.goal:
             acabou = True
-    print("FIM: total de expandidos: " + str(gridProblem.expanded ))
+    print("FIM: total de expandidos: " + str(gridProblem.numExpanded))
+
 
 def planeia_adaptativo_online(pacman, pastilha, obstaculos):
     aroundObstacles = obstaclesAround(pacman, obstaculos)
@@ -152,39 +161,38 @@ def planeia_adaptativo_online(pacman, pastilha, obstaculos):
         path = []
         iteracao += 1
         print("ITERAÇÃO: " + str(iteracao))
-        gridProblem.expandedMoment = 0
+        gridProblem.expandedMoment.clear()
         res_astar = astar_search(
             gridProblem, gridProblem.manhatan_goal).solution()
         print(str(res_astar))
-        print("Expandidos " + str(gridProblem.expandedMoment))
+        print("Expandidos " + str(len(gridProblem.expandedMoment)))
         path = steps(gridProblem.initial, res_astar)
-        pacInitial = gridProblem.initial
+        heuristica(gridProblem, len(res_astar))
+        print(gridProblem.heuristicas)
         for x in range(1, len(path)):
             if path[x] in obstaculos:
                 del path[x:]
                 gridProblem.initial = path[x-1]
                 break
             else:
-                print(heuristica(pacInitial, path[x], len(path)))
                 gridProblem.initial = path[x]
                 aroundPac = aroundPacman(gridProblem.initial)
                 for i in aroundPac:
                     if i in obstaculos and i not in gridProblem.obstacles:
                         gridProblem.addObstacle(i)
-            pacInitial = gridProblem.initial
-                            
-        display(gridProblem.initial, gridProblem.goal, gridProblem.obstacles, path=path)
+
+        display(gridProblem.initial, gridProblem.goal,
+                gridProblem.obstacles, path=path)
 
         if gridProblem.initial == gridProblem.goal:
             acabou = True
-    print("FIM: total de expandidos: " + str(gridProblem.expanded ))
+    print("FIM: total de expandidos: " + str(gridProblem.numExpanded))
 
 
-pacman=(1,1)
-pastilha=(3,3)
-l = line(2,2,1,0,6)
-c = line(2,3,0,1,4)
-fronteira = quadro(0,0,10)
-obstaculos=fronteira | l | c
-planeia_adaptativo_online(pacman,pastilha,obstaculos)
-
+pacman = (1, 1)
+pastilha = (3, 3)
+l = line(2, 2, 1, 0, 6)
+c = line(2, 3, 0, 1, 4)
+fronteira = quadro(0, 0, 10)
+obstaculos = fronteira | l | c
+planeia_adaptativo_online(pacman, pastilha, obstaculos)
