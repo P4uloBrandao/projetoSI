@@ -33,6 +33,7 @@ class GridProblem(Problem):
         self.heuristicas.add(state)
         self.expandedMoment += 1
         return actions
+
     def goal_test(self, state):
         return state == self.goal
 
@@ -43,9 +44,22 @@ class GridProblem(Problem):
         """
         return manhatan(no.state, self.goal)
 
+    def new_heuristic(self, node):
+        return manhatan(self.initial, self.goal) + manhatan(self.initial, node)
+        
+    def f_heuristic(self, no):
+        if no.state in self.heuristicas:
+            return manhatan_goal(no.state, self.goal)
+        else:
+            self.heuristicas.add((no.state,
+            manhatan_goal(no.state, self.goal)))
+
+    def m(self, state):
+        return manhatan(state, self.goal)
+
     def addObstacle(self, obstacle):
         self.obstacles.add(obstacle)
-
+    
 
 def aroundPacman(pacman):
     return [(pacman[0]+i, pacman[1]+j)
@@ -79,56 +93,82 @@ def steps(pacman, iteracao):
     return path
 
 
+def verifica_heuristica(state, new_path):
+    #alterar heuristica para distancia inicio ao golo - distancia ao no atual
+#so para os nos explorados
+    for tupl in new_path:
+        if tupl[0] == state:
+            return tupl[1]
+        else:
+            new_path.append( (state, gridProblem.manhatan_goal(Node(state))))
 
-
-
-def planeia_online(pacman, pastilha, obstaculos):
-
-    aroundObstacles = obstaclesAround(pacman, obstaculos)
-    iteracao = 0
-
-    gridProblem = GridProblem(
-        initial=pacman, obstacles=aroundObstacles, goal=pastilha)
-
-    acabou = False
-
-    print("MUNDO")
-    display(pacman, pastilha, obstaculos, path=[])
-
-    print("MODELO")
-    #  faz modelo é o mundo cortado em que é mostrado o pacman e a pastilha
-    # em cada iteração irá mostrar o plano gerado pelo astar_search
-    display(gridProblem.initial, gridProblem.goal, gridProblem.obstacles)
-
-    while not acabou:
-        path = []
-        iteracao += 1
-        print("ITERAÇÃO: " + str(iteracao))
-        gridProblem.expandedMoment = 0
-        res_astar = astar_search(
-            gridProblem, gridProblem.manhatan_goal).solution()
-        print(str(res_astar))
-        print("Expandidos " + str(gridProblem.expandedMoment))
-        path = steps(gridProblem.initial, res_astar)
-        for x in range(1, len(path)):
-            if path[x] in obstaculos:
-                del path[x:]
-                gridProblem.initial = path[x-1]
-                break
-            else:
-                gridProblem.initial = path[x]
-                aroundPac = aroundPacman(gridProblem.initial)
-                for i in aroundPac:
-                    if i in obstaculos and i not in gridProblem.obstacles:
-                        gridProblem.addObstacle(i)
-                            
-        display(gridProblem.initial, gridProblem.goal, gridProblem.obstacles, path=path)
-
-        if gridProblem.initial == gridProblem.goal:
-            acabou = True
-    print("FIM: total de expandidos: " + str(gridProblem.expanded ))
 
 def planeia_adaptativo_online(pacman, pastilha, obstaculos):
+    
+    aroundObstacles = obstaclesAround(pacman, obstaculos)
+    iteracao = 0
+    heuristicDict = {}
+
+    gridProblem = GridProblem(
+        initial=pacman, obstacles=aroundObstacles, goal=pastilha)
+
+    acabou = False
+
+    print("MUNDO")
+    display(pacman, pastilha, obstaculos, path=[])
+
+    print("MODELO")
+    # faz modelo é o mundo cortado em que é mostrado o pacman e a pastilha
+    # em cada iteração irá mostrar o plano gerado pelo astar_search
+    display(gridProblem.initial, gridProblem.goal, gridProblem.obstacles)
+
+    while not acabou:
+        path = []
+        iteracao += 1
+
+        print("ITERAÇÃO: " + str(iteracao))
+
+        gridProblem.expandedMoment = 0
+        res_astar = astar_search(
+            gridProblem, gridProblem.manhatan_goal).solution()
+
+        print(str(res_astar))
+        print("Expandidos " + str(gridProblem.expandedMoment))
+
+        path = steps(gridProblem.initial, res_astar)
+        print(gridProblem.heuristicas)
+
+        for node in gridProblem.heuristicas:
+            if node not in heuristicDict:
+                heuristicDict[node] = gridProblem.m(node)
+            else:
+                heuristicDict[node] = gridProblem.new_heuristic(node)
+   
+        print("AFTER NEW HEURISTIC")
+        print(heuristicDict)
+
+        for x in range(1, len(path)):
+            if path[x] in obstaculos:
+                del path[x:]
+                gridProblem.initial = path[x-1]
+                break
+
+            else:
+                gridProblem.initial = path[x]
+                aroundPac = aroundPacman(gridProblem.initial)
+                for i in aroundPac:
+                    if i in obstaculos and i not in gridProblem.obstacles:
+                        gridProblem.addObstacle(i)
+
+        display(gridProblem.initial, gridProblem.goal, gridProblem.obstacles, path=path)
+
+        if gridProblem.initial == gridProblem.goal:
+            acabou = True
+
+    print("FIM: total de expandidos: " + str(gridProblem.expanded))
+
+def planeia_online(pacman, pastilha, obstaculos):
+    
     aroundObstacles = obstaclesAround(pacman, obstaculos)
     iteracao = 0
 
@@ -155,7 +195,6 @@ def planeia_adaptativo_online(pacman, pastilha, obstaculos):
         print(str(res_astar))
         print("Expandidos " + str(gridProblem.expandedMoment))
         path = steps(gridProblem.initial, res_astar)
-        print(gridProblem.heuristicas)
         for x in range(1, len(path)):
             if path[x] in obstaculos:
                 del path[x:]
@@ -173,7 +212,6 @@ def planeia_adaptativo_online(pacman, pastilha, obstaculos):
         if gridProblem.initial == gridProblem.goal:
             acabou = True
     print("FIM: total de expandidos: " + str(gridProblem.expanded ))
-
 
 pacman=(1,1)
 pastilha=(3,3)
