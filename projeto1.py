@@ -30,6 +30,7 @@ class GridProblem(Problem):
             if (x+dx, y+dy) not in self.obstacles:
                 actions.append(action)
         self.expanded += 1
+        self.heuristicas.add(state)
         self.expandedMoment += 1
         return actions
     def goal_test(self, state):
@@ -77,10 +78,6 @@ def steps(pacman, iteracao):
             path.append(pacman)
     return path
 
-def heuristica(initial, end, solutionCost):
-    iX, iY = initial
-    eX, eY = end
-    return (end, abs(solutionCost - (abs(iX-eX) + abs(iY-eY))))  
 
 
 
@@ -158,20 +155,18 @@ def planeia_adaptativo_online(pacman, pastilha, obstaculos):
         print(str(res_astar))
         print("Expandidos " + str(gridProblem.expandedMoment))
         path = steps(gridProblem.initial, res_astar)
-        pacInitial = gridProblem.initial
+        print(gridProblem.heuristicas)
         for x in range(1, len(path)):
             if path[x] in obstaculos:
                 del path[x:]
                 gridProblem.initial = path[x-1]
                 break
             else:
-                print(heuristica(pacInitial, path[x], len(path)))
                 gridProblem.initial = path[x]
                 aroundPac = aroundPacman(gridProblem.initial)
                 for i in aroundPac:
                     if i in obstaculos and i not in gridProblem.obstacles:
                         gridProblem.addObstacle(i)
-            pacInitial = gridProblem.initial
                             
         display(gridProblem.initial, gridProblem.goal, gridProblem.obstacles, path=path)
 
