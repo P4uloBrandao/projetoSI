@@ -10,14 +10,14 @@ def getVariables(puzzle):
             if type(puzzle[x][y]) == int:
                 varName= "V_%d_%d" % (x, y)
                 if varName not in variables:
-                    variables.append("V_%d_%d" % (x, y))
+                    variables.append(varName)
             else:
                 neighbors= getNeighbors(x, y, rows, cols)
                 for j in neighbors:
                     if type(puzzle[j[0]][j[1]]) == int:
-                        varName= "V_%d_%d" % (j[0], j[1])
+                        varName= "V_%d_%d" % (x, y)
                         if varName not in variables:
-                            variables.append("V_%d_%d" % (j[0], j[1]))
+                            variables.append(varName)
     variables = sorted(variables)
     return variables
 
