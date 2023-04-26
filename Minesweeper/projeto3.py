@@ -21,6 +21,11 @@ def getVariables(puzzle):
     variables = sorted(variables)
     return variables
 
+def show_domains(domains):
+    result=[]
+    for key in domains:
+        result.append((key, domains[key]))
+    return result
 
 def getNeighbors(x, y, rows, cols):
     neighbors = []
@@ -78,7 +83,6 @@ puzzle = [[1, 2, '#', '#', '#'],
           ['#', '#', 2, '#', 3],
           [2, 2, '#', 2, '#']]
 
-print(defineDomains(puzzle))
 
 
 def minesweeper_CSP(puzzle):
@@ -86,8 +90,18 @@ def minesweeper_CSP(puzzle):
     variables = getVariables(puzzle)
     # Definir Domínios
     domains = defineDomains(puzzle)
+    # Definir Vizinhos
+    neighbors = {}
+    for var in variables:
+        varParsed = int(var.split('_')[1]), int(var.split('_')[2])
+        neighbors[var] = []
+        for x in getNeighbors(varParsed[1], varParsed[0], len(puzzle), len(puzzle[0])):
+            neighbors[var].append("V_%d_%d" % (x[0], x[1]))
 
 
     return CSP(variables, domains, neighbors ,constraints)
+
+print(show_domains(defineDomains(puzzle)))
+
 
 
