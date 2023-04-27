@@ -21,11 +21,13 @@ def getVariables(puzzle):
     variables = sorted(variables)
     return variables
 
+
 def show_domains(domains):
-    result=[]
+    result = []
     for key in domains:
         result.append((key, domains[key]))
     return result
+
 
 def getNeighbors(x, y, rows, cols):
     neighbors = []
@@ -66,13 +68,14 @@ def defineDomains(puzzle):
                     espacosVazios += 1
             for x in range(espacosVazios-1, -1, -1):
                 lst.append(x)
-            res=[]
+            res = []
             for comb in itertools.combinations(lst, numBombas):
                 newLst = [0] * espacosVazios
                 for x in comb:
                     newLst[x] = 1
                 res.append(tuple(newLst))
-            domain[var]=res
+            domain[var] = sorted(res)
+            
 
     return domain
 
@@ -82,7 +85,6 @@ puzzle = [[1, 2, '#', '#', '#'],
           ['#', '#', '#', 4, '#'],
           ['#', '#', 2, '#', 3],
           [2, 2, '#', 2, '#']]
-
 
 
 def minesweeper_CSP(puzzle):
@@ -98,10 +100,7 @@ def minesweeper_CSP(puzzle):
         for x in getNeighbors(varParsed[1], varParsed[0], len(puzzle), len(puzzle[0])):
             neighbors[var].append("V_%d_%d" % (x[0], x[1]))
 
+    return CSP(variables, domains, neighbors, different_values_constraint)
 
-    return CSP(variables, domains, neighbors ,constraints)
 
 print(show_domains(defineDomains(puzzle)))
-
-
-

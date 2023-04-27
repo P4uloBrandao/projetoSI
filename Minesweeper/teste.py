@@ -1,3 +1,5 @@
 from csp import *
 
-print(parse_neighbors("X: Y Z; Y: Z"))
+a= [2,3,1,4,5,2,34,6]
+
+print(sorted(a))
