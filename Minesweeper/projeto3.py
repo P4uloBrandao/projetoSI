@@ -119,10 +119,6 @@ def find_positions(puzzle):
     return dic
 
 
-def name_find_positions(puzzle):
-    find_positions(puzzle)
-
-
 def updateVariables(neighbors):
     vars = []
     for var in neighbors:
@@ -156,15 +152,21 @@ def minesweeper_CSP(puzzle):
     # domains = updateDomains(neighbors, domains)
 
     # Definir Restrições
-    constraints = {}
 
-    return CSP(variables, domains, neighbors, None)
+    def defineConstraint(A, a, B, b):
+        if type(a) == int:
+            vizinhos = neighbors[B]
+            for x in range(len(vizinhos)):
+                if vizinhos[x] == A:
+                    if len(b) >= x+1:
+                        return a == b[x]
 
-puzzle=[[1, 2, '#', '#', '#'],
-    [1,'#','#','#',2],
-    ['#','#','#',4,'#'],
-    ['#','#',2,'#',3],
-    [2,2,'#',2,'#']]
-xxx= minesweeper_CSP(puzzle)
-r = backtracking_search(xxx)
-puzzle_display(fill_puzzle(puzzle,r))
+        if type(b) == int:
+            vizinhos = neighbors[A]
+            for x in range(len(vizinhos)):
+                if vizinhos[x] == B:
+                    if len(a) >= x+1:
+                        return a[x] == b
+        return a == b
+
+    return CSP(variables, domains, neighbors, defineConstraint)
