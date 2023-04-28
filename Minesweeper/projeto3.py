@@ -2,6 +2,7 @@ from csp import *
 from p3_aux import *
 import numpy as np
 
+
 def getVariables(puzzle):
     variables = []
     rows, cols = len(puzzle), len(puzzle[0])
@@ -62,7 +63,7 @@ def defineDomains(puzzle):
                     espacosVazios += 1
             for x in range(espacosVazios):
                 lst.append(0)
-            
+
             for k in range(numBombas):
                 lst[k] = 1
             res = (sorted(set(itertools.permutations(lst))))
@@ -73,10 +74,11 @@ def defineDomains(puzzle):
 
 
 def show_domains(dic):
-    r=[]
+    r = []
     for chave in dic:
-        r.append((chave,dic[chave]))
+        r.append((chave, dic[chave]))
     return r
+
 
 def find_positions(puzzle):
     puzzle = np.array(puzzle)
@@ -88,37 +90,38 @@ def find_positions(puzzle):
     hastag_positions = []
     for i in range(len(puzzle)):
         for j in range(len(puzzle[i])):
-            #print("(I: " + str(i) + ", J: " + str(j) + ")" + str(puzzle[i][j]))
+            # print("(I: " + str(i) + ", J: " + str(j) + ")" + str(puzzle[i][j]))
             varName = "V_%d_%d" % (i, j)
             lista = []
             if puzzle[i][j] != '#':
-                #number_positions.append((i,j))
+                # number_positions.append((i,j))
                 k = getNeighbors(i, j, rows, cols)
                 for x in k:
                     varName1 = "V_%d_%d" % (x[0], x[1])
                     if puzzle[x[0]][x[1]] == '#':
-                        
+
                         lista.append(varName1)
                 if len(lista) > 0:
                     dic[varName] = sorted(lista)
             else:
-                #hastag_positions.append((i,j))
-                #number_positions.append((i,j))
+                # hastag_positions.append((i,j))
+                # number_positions.append((i,j))
                 k = getNeighbors(i, j, rows, cols)
                 for x in k:
                     posicao = puzzle[x[0]][x[1]]
                     varName1 = "V_%d_%d" % (x[0], x[1])
                     if puzzle[x[0]][x[1]] != '#':
-                        
+
                         lista.append(varName1)
                 if len(lista) > 0:
                     dic[varName] = sorted(lista)
 
-
     return dic
+
 
 def name_find_positions(puzzle):
     find_positions(puzzle)
+
 
 def updateVariables(neighbors):
     vars = []
@@ -126,7 +129,8 @@ def updateVariables(neighbors):
         if var not in vars:
             vars.append(var)
     return vars
-    
+
+
 def updateDomains(neighbors, domains):
     removeKeys = []
     for d in domains:
@@ -136,37 +140,31 @@ def updateDomains(neighbors, domains):
         domains.pop(r)
     return domains
 
+
 def minesweeper_CSP(puzzle):
     # Definir Variáveis
     variables = getVariables(puzzle)
 
     # Definir Domínios
-    #domains = defineDomains(puzzle)
-    
+    domains = defineDomains(puzzle)
+
     # Definir Vizinhos
     neighbors = find_positions(puzzle)
 
     variables = updateVariables(neighbors)
 
-    #domains = updateDomains(neighbors, domains)
+    # domains = updateDomains(neighbors, domains)
 
     # Definir Restrições
     constraints = {}
 
-    return CSP(variables, None, neighbors ,None)
-
+    return CSP(variables, domains, neighbors, None)
 
 puzzle=[[1, 2, '#', '#', '#'],
-[1,'#','#','#',2],
-['#','#','#',4,'#'],
-['#','#',2,'#',3],
-[2,2,'#',2,'#'],
-['#','#','#',4,'#'],
-['#','#',2,'#',3],
-['#','#','#','#','#']]
+    [1,'#','#','#',2],
+    ['#','#','#',4,'#'],
+    ['#','#',2,'#',3],
+    [2,2,'#',2,'#']]
 xxx= minesweeper_CSP(puzzle)
-#print(xxx.variables)
-#print(xxx.domains)
-#print(xxx.neighbors)
-
-#print(show_domains(xxx.domains))
+r = backtracking_search(xxx)
+puzzle_display(fill_puzzle(puzzle,r))
