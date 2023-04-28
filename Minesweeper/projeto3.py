@@ -139,17 +139,8 @@ def minesweeper_CSP(puzzle):
                 if type(puzzle[x[1]][x[0]]) == int:
                     neighbors[var].append("V_%d_%d" % (x[0], x[1]))
             neighbors[var] = sorted(neighbors[var])
-    print(neighbors["V_4_1"])
     
     return CSP(variables, domains, neighbors, defineConstraint)
 
 
 
-puzzle = [[1, 2, '#', '#', '#', '#', '#'],
-            [1, '#', '#', '#', 2, '#', '#'],
-            ['#', '#', '#', 4, '#', '#', '#'],
-            ['#', '#', 2, '#', 3, '#', '#'],
-            [2, 2, '#', 2, '#', '#', '#'],
-            ['#', '#', '#', '#', '#', '#', '#']]
-xxx = minesweeper_CSP(puzzle)
-grafo = xxx.neighbors
