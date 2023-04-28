@@ -120,17 +120,53 @@ def find_positions(puzzle):
 def name_find_positions(puzzle):
     find_positions(puzzle)
 
+def updateVariables(neighbors):
+    vars = []
+    for var in neighbors:
+        if var not in vars:
+            vars.append(var)
+    return vars
+    
+def updateDomains(neighbors, domains):
+    removeKeys = []
+    for d in domains:
+        if d not in neighbors:
+            removeKeys.append(d)
+    for r in removeKeys:
+        domains.pop(r)
+    return domains
 
 def minesweeper_CSP(puzzle):
     # Definir Variáveis
     variables = getVariables(puzzle)
+
     # Definir Domínios
-    domains = defineDomains(puzzle)
+    #domains = defineDomains(puzzle)
+    
     # Definir Vizinhos
     neighbors = find_positions(puzzle)
+
+    variables = updateVariables(neighbors)
+
+    #domains = updateDomains(neighbors, domains)
+
     # Definir Restrições
     constraints = {}
 
-    
+    return CSP(variables, None, neighbors ,None)
 
-    return CSP(variables, domains, neighbors ,constraints)
+
+puzzle=[[1, 2, '#', '#', '#'],
+[1,'#','#','#',2],
+['#','#','#',4,'#'],
+['#','#',2,'#',3],
+[2,2,'#',2,'#'],
+['#','#','#',4,'#'],
+['#','#',2,'#',3],
+['#','#','#','#','#']]
+xxx= minesweeper_CSP(puzzle)
+#print(xxx.variables)
+#print(xxx.domains)
+#print(xxx.neighbors)
+
+#print(show_domains(xxx.domains))
