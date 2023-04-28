@@ -86,25 +86,25 @@ def find_positions(puzzle):
     rows, cols = len(puzzle), len(puzzle[0])
     number_positions = []
     hastag_positions = []
+
     for i in range(len(puzzle)):
         for j in range(len(puzzle[i])):
-            #print("(I: " + str(i) + ", J: " + str(j) + ")" + str(puzzle[i][j]))
             varName = "V_%d_%d" % (i, j)
             lista = []
+
             if puzzle[i][j] != '#':
-                #number_positions.append((i,j))
                 k = getNeighbors(i, j, rows, cols)
+
                 for x in k:
                     varName1 = "V_%d_%d" % (x[0], x[1])
-                    if puzzle[x[0]][x[1]] == '#':
-                        
+                    if puzzle[x[0]][x[1]] == '#': 
                         lista.append(varName1)
+
                 if len(lista) > 0:
                     dic[varName] = sorted(lista)
             else:
-                #hastag_positions.append((i,j))
-                #number_positions.append((i,j))
                 k = getNeighbors(i, j, rows, cols)
+                
                 for x in k:
                     posicao = puzzle[x[0]][x[1]]
                     varName1 = "V_%d_%d" % (x[0], x[1])
@@ -142,7 +142,7 @@ def minesweeper_CSP(puzzle):
 
     # Definir Domínios
     #domains = defineDomains(puzzle)
-    
+
     # Definir Vizinhos
     neighbors = find_positions(puzzle)
 
@@ -154,19 +154,3 @@ def minesweeper_CSP(puzzle):
     constraints = {}
 
     return CSP(variables, None, neighbors ,None)
-
-
-puzzle=[[1, 2, '#', '#', '#'],
-[1,'#','#','#',2],
-['#','#','#',4,'#'],
-['#','#',2,'#',3],
-[2,2,'#',2,'#'],
-['#','#','#',4,'#'],
-['#','#',2,'#',3],
-['#','#','#','#','#']]
-xxx= minesweeper_CSP(puzzle)
-#print(xxx.variables)
-#print(xxx.domains)
-#print(xxx.neighbors)
-
-#print(show_domains(xxx.domains))
