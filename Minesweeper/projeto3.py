@@ -1,6 +1,6 @@
 from csp import *
 from p3_aux import *
-
+import numpy as np
 
 def getVariables(puzzle):
     variables = []
@@ -24,22 +24,23 @@ def getVariables(puzzle):
 
 def getNeighbors(x, y, rows, cols):
     neighbors = []
-    if x - 1 >= 0:
-        neighbors.append((x-1, y))
-    if x + 1 < rows:
-        neighbors.append((x+1, y))
     if y - 1 >= 0:
         neighbors.append((x, y-1))
-    if y + 1 < cols:
-        neighbors.append((x, y+1))
-    if x - 1 >= 0 and y - 1 >= 0:
-        neighbors.append((x-1, y-1))
-    if x - 1 >= 0 and y + 1 < cols:
-        neighbors.append((x-1, y+1))
     if x + 1 < rows and y - 1 >= 0:
         neighbors.append((x+1, y-1))
+    if x + 1 < rows:
+        neighbors.append((x+1, y))
     if x + 1 < rows and y + 1 < cols:
         neighbors.append((x+1, y+1))
+    if y + 1 < cols:
+        neighbors.append((x, y+1))
+    if x - 1 >= 0 and y + 1 < cols:
+        neighbors.append((x-1, y+1))
+    if x - 1 >= 0:
+        neighbors.append((x-1, y))
+
+    if x - 1 >= 0 and y - 1 >= 0:
+        neighbors.append((x-1, y-1))
     return neighbors
 
 
@@ -78,36 +79,40 @@ def show_domains(dic):
     return r
 
 def find_positions(puzzle):
-    
+    puzzle = np.array(puzzle)
+    puzzle = puzzle.transpose()
+
     dic = {}
     rows, cols = len(puzzle), len(puzzle[0])
     number_positions = []
     hastag_positions = []
     for i in range(len(puzzle)):
         for j in range(len(puzzle[i])):
+            #print("(I: " + str(i) + ", J: " + str(j) + ")" + str(puzzle[i][j]))
             varName = "V_%d_%d" % (i, j)
             lista = []
-            if puzzle[j][i] != '#':
+            if puzzle[i][j] != '#':
                 #number_positions.append((i,j))
                 k = getNeighbors(i, j, rows, cols)
-                for x in getNeighbors(i, j, rows, cols):
+                for x in k:
                     varName1 = "V_%d_%d" % (x[0], x[1])
-                    if puzzle[x[1]][x[0]] == '#':
+                    if puzzle[x[0]][x[1]] == '#':
                         
                         lista.append(varName1)
-                dic[varName] = sorted(lista)
+                if len(lista) > 0:
+                    dic[varName] = sorted(lista)
             else:
                 #hastag_positions.append((i,j))
                 #number_positions.append((i,j))
                 k = getNeighbors(i, j, rows, cols)
-                for x in getNeighbors(i, j, rows, cols):
-                    print(x)
-                    posicao = puzzle[x[1]][x[0]]
+                for x in k:
+                    posicao = puzzle[x[0]][x[1]]
                     varName1 = "V_%d_%d" % (x[0], x[1])
-                    if puzzle[x[1]][x[0]] != '#':
+                    if puzzle[x[0]][x[1]] != '#':
                         
                         lista.append(varName1)
-                dic[varName] = sorted(lista)
+                if len(lista) > 0:
+                    dic[varName] = sorted(lista)
 
 
     return dic
@@ -129,14 +134,3 @@ def minesweeper_CSP(puzzle):
     
 
     return CSP(variables, domains, neighbors ,constraints)
-  
-
-
-puzzle=[[1, 2,'#','#','#','#','#'],\
-[1,'#','#','#',2,'#','#'],\
-['#','#','#',4,'#','#','#'],\
-['#','#',2,'#',3,'#','#'],\
-[2,2,'#',2,'#','#','#'],\
-['#','#','#','#','#','#','#']]
-xxx= minesweeper_CSP(puzzle)
-print(xxx.variables)
