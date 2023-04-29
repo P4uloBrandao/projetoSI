@@ -69,7 +69,7 @@ def defineDomains(puzzle):
             for k in range(numBombas):
                 lst[k] = 1
             res = (sorted(set(itertools.permutations(lst))))
-            domain[var] = sorted(res)
+            domain[var] = res
 
     return domain
 
@@ -102,7 +102,7 @@ def find_positions(puzzle):
                         lista.append(varName1)
 
                 if len(lista) > 0:
-                    dic[varName] = sorted(lista)
+                    dic[varName] = (lista)
             else:
                 k = getNeighbors(i, j, rows, cols)
                 
@@ -113,7 +113,7 @@ def find_positions(puzzle):
 
                         lista.append(varName1)
                 if len(lista) > 0:
-                    dic[varName] = sorted(lista)
+                    dic[varName] = lista
 
     return dic
 
@@ -137,21 +137,18 @@ def updateDomains(neighbors, domains):
 
 
 def minesweeper_CSP(puzzle):
-    # Definir Variáveis
+
     variables = getVariables(puzzle)
 
-    # Definir Domínios
     domains = defineDomains(puzzle)
 
-    # Definir Vizinhos
     neighbors = find_positions(puzzle)
 
     variables = updateVariables(neighbors)
 
     domains = updateDomains(neighbors, domains)
 
-    # Definir Restrições
-    # constraints = {}
+
     def defineConstraint(A, a, B, b):
         if type(a) == int:
             vizinhos = neighbors[B]
