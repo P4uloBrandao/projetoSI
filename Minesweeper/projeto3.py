@@ -4,18 +4,20 @@ import numpy as np
 
 
 def getVariables(puzzle):
+    puzzle = np.array(puzzle)
+    puzzle = puzzle.transpose()
     variables = []
     rows, cols = len(puzzle), len(puzzle[0])
     for x in range(rows):
         for y in range(cols):
-            if type(puzzle[x][y]) == int:
+            if puzzle[x][y] != "#":
                 varName = "V_%d_%d" % (x, y)
                 if varName not in variables:
                     variables.append(varName)
             else:
                 neighbors = getNeighbors(x, y, rows, cols)
                 for j in neighbors:
-                    if type(puzzle[j[0]][j[1]]) == int:
+                    if puzzle[j[0]][j[1]] != "#": 
                         varName = "V_%d_%d" % (x, y)
                         if varName not in variables:
                             variables.append(varName)
@@ -67,7 +69,6 @@ def defineDomains(puzzle):
             for k in range(numBombas):
                 lst[k] = 1
             res = (sorted(set(itertools.permutations(lst))))
-            # domain[var]=res
             domain[var] = sorted(res)
 
     return domain
@@ -86,8 +87,6 @@ def find_positions(puzzle):
 
     dic = {}
     rows, cols = len(puzzle), len(puzzle[0])
-    number_positions = []
-    hastag_positions = []
 
     for i in range(len(puzzle)):
         for j in range(len(puzzle[i])):
@@ -142,16 +141,31 @@ def minesweeper_CSP(puzzle):
     variables = getVariables(puzzle)
 
     # Definir Domínios
-    #domains = defineDomains(puzzle)
+    domains = defineDomains(puzzle)
 
     # Definir Vizinhos
     neighbors = find_positions(puzzle)
 
     variables = updateVariables(neighbors)
 
-    # domains = updateDomains(neighbors, domains)
+    domains = updateDomains(neighbors, domains)
 
     # Definir Restrições
-    constraints = {}
+    # constraints = {}
+    def defineConstraint(A, a, B, b):
+        if type(a) == int:
+            vizinhos = neighbors[B]
+            for x in range(len(vizinhos)):
+                if vizinhos[x] == A:
+                    if len(b) >= x+1:
+                        return a == b[x]
 
-    return CSP(variables, None, neighbors ,None)
+        if type(b) == int:
+            vizinhos = neighbors[A]
+            for x in range(len(vizinhos)):
+                if vizinhos[x] == B:
+                    if len(a) >= x+1:
+                        return a[x] == b
+        return a == b
+
+    return CSP(variables, domains, neighbors, defineConstraint)
