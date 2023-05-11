@@ -1,6 +1,7 @@
 # Grupo 56
 from jogar import *
 from La_Ouri import *
+from kibir import *
 
 
 def func_aval_1111(s, p):
@@ -94,15 +95,6 @@ def func_aval_56(s, p):
                 return -100
             else:
                 return 0
-
-    # Se ainda não terminou, a pontuação é calculada com base no número de pedras no tabuleiro.
-    # if p == "Um":
-    #     pedras_jogador = sum(s.tabuleiro[:6])
-    #     pedras_oponente = sum(s.tabuleiro[6:])
-    # else:
-    #     pedras_jogador = sum(s.tabuleiro[6:])
-    #     pedras_oponente = sum(s.tabuleiro[:6])
-
     if p == "Um":
         pecasJog = s.sacoUm+sum(s.tabuleiro[:s.n//2])
         contagemOp = contarSequencias(s.tabuleiro[s.n//2:]) - contarSequencias(s.tabuleiro[:s.n//2])
@@ -123,16 +115,15 @@ def func_aval_56(s, p):
 
 
 jogadorOuri_56 = JogadorAlfaBeta("Jogador56", 4, func_aval_56)
-jogadorOuri_Kibir4 = JogadorAlfaBeta("Kibir4", 4, func_aval_1111)
 
-jogadores = [jogadorOuri_56, jogadorOuri_Kibir4]
+jogadores = todos_jogadores + [jogadorOuri_56]
 contador=0
 tamanhoComp= 10
-for x in range(tamanhoComp):
-        campeonato = faz_campeonatoHard(JogoOuri(), jogadores, 1)
+# for x in range(tamanhoComp):
+#         campeonato = faz_campeonatoHard(JogoOuri(), jogadores, 1)
 
-        contador +=campeonato
-print(str(round((contador/tamanhoComp)*100))+"%")
+#         contador +=campeonato
+# print(str(round((contador/tamanhoComp)*100))+"%")
 
 # for x in range(3):
-#     faz_campeonato(JogoOuri(), jogadores, 1)
+faz_campeonato(JogoOuri(), jogadores, 1)
